@@ -1,9 +1,11 @@
 const LINKS = [
   { label: "Vision", href: "#vision" },
   { label: "Roadmap", href: "#solution" },
-  { label: "GitHub", href: "https://github.com" },
-  { label: "Contact", href: "mailto:hello@foundrybuild.xyz" },
+  { label: "GitHub", href: "https://github.com/VatsalyaBhadaurya/Foundry-Build" },
+  { label: "Contact", href: "#waitlist" },
 ];
+
+const COMPANY = "Nextgen Research Lab And Infrastructure Development Pvt Ltd";
 
 export function Footer() {
   return (
@@ -13,6 +15,9 @@ export function Footer() {
           <span className="text-[15px] font-semibold tracking-tight">FoundryBuild</span>
           <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-muted)]">
             Turn ideas into buildable reality.
+          </p>
+          <p className="mt-4 text-xs leading-relaxed text-[var(--color-text-faint)]">
+            A product by {COMPANY}
           </p>
         </div>
 
@@ -30,11 +35,24 @@ export function Footer() {
             </a>
           ))}
         </nav>
+
+        <div className="text-sm">
+          <p className="mb-3 font-medium text-[var(--color-text)]">Contact</p>
+          <p className="text-[var(--color-text-muted)]">Vatsalya Bhadaurya</p>
+          <a
+            href="https://www.vatsalyaaa.me"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-block text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+          >
+            www.vatsalyaaa.me
+          </a>
+        </div>
       </div>
 
       <div className="mx-auto mt-12 max-w-6xl px-6">
         <p className="text-xs text-[var(--color-text-faint)]">
-          © {new Date().getFullYear()} FoundryBuild. All rights reserved.
+          © {new Date().getFullYear()} {COMPANY}. All rights reserved.
         </p>
       </div>
     </footer>
