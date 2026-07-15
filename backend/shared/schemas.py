@@ -96,6 +96,15 @@ class DesignVariant(BaseModel):
     hardware: list[str] = Field(default_factory=list)
 
 
+class FeasibilityExplanations(BaseModel):
+    technical_feasibility: str = ""
+    commercial_potential: str = ""
+    innovation: str = ""
+    complexity: str = ""
+    scalability: str = ""
+    maintainability: str = ""
+
+
 class FeasibilityScores(BaseModel):
     technical_feasibility: int = Field(ge=0, le=100)
     commercial_potential: int = Field(ge=0, le=100)
@@ -104,7 +113,7 @@ class FeasibilityScores(BaseModel):
     scalability: int = Field(ge=0, le=100)
     maintainability: int = Field(ge=0, le=100)
     overall_recommendation: str
-    explanations: dict[str, str] = Field(default_factory=dict)
+    explanations: FeasibilityExplanations = Field(default_factory=FeasibilityExplanations)
 
 
 class DevilCritique(BaseModel):

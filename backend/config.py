@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     supabase_key: str = ""
     github_token: str = ""
     cors_origins_str: str = "http://localhost:3000,https://foundrybuild.xyz"
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-3.1-flash-lite"
     max_interview_turns: int = 8
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}

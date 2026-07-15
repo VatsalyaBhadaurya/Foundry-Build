@@ -53,25 +53,35 @@ export function InterviewPanel({ projectId, onComplete }: Props) {
 
     setMessages((prev) => [...prev, { role: "user", content: answer }]);
 
-    try {
-      const res = await api.answerQuestion(projectId, answer);
-      setTurn(res.turn);
+    const attempt = async (retriesLeft: number) => {
+      try {
+        const res = await api.answerQuestion(projectId, answer);
+        setTurn(res.turn);
+        setError("");
 
-      if (res.complete) {
-        setMessages((prev) => [
-          ...prev,
-          { role: "cto", content: "Perfect. I have everything I need. Launching the analysis now…" },
-        ]);
-        setTimeout(onComplete, 1200);
-      } else if (res.question) {
-        setMessages((prev) => [...prev, { role: "cto", content: res.question! }]);
+        if (res.complete) {
+          setMessages((prev) => [
+            ...prev,
+            { role: "cto", content: "Perfect. I have everything I need. Launching the analysis now…" },
+          ]);
+          setTimeout(onComplete, 1200);
+        } else if (res.question) {
+          setMessages((prev) => [...prev, { role: "cto", content: res.question! }]);
+          setLoading(false);
+          setTimeout(() => inputRef.current?.focus(), 100);
+        }
+      } catch (err) {
+        if (retriesLeft > 0) {
+          // Silently retry once after a short delay
+          await new Promise((r) => setTimeout(r, 2000));
+          return attempt(retriesLeft - 1);
+        }
+        setError(err instanceof Error ? err.message : "Failed to send. Please try again.");
         setLoading(false);
-        setTimeout(() => inputRef.current?.focus(), 100);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send answer");
-      setLoading(false);
-    }
+    };
+
+    await attempt(1);
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {

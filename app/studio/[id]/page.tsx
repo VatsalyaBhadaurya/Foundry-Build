@@ -52,6 +52,9 @@ export default function StudioSessionPage() {
         try {
           const event = JSON.parse(e.data);
 
+          // Ignore keepalive pings
+          if (event.type === "ping") return;
+
           if (event.type === "start") {
             setAgents((prev) =>
               prev.map((a) => a.name === event.agent ? { ...a, status: "running" } : a)
@@ -60,7 +63,8 @@ export default function StudioSessionPage() {
             setAgents((prev) =>
               prev.map((a) => a.name === event.agent ? { ...a, status: "complete" } : a)
             );
-          } else if (event.type === "error") {
+          } else if (event.type === "error" && event.agent !== "Orchestrator") {
+            // Agent-level errors are non-fatal — mark that agent failed but keep going
             setAgents((prev) =>
               prev.map((a) => a.name === event.agent ? { ...a, status: "error", error: event.error } : a)
             );
@@ -80,15 +84,19 @@ export default function StudioSessionPage() {
       };
 
       es.onerror = () => {
-        es.close();
-        // Check if blueprint is already ready (stream might have closed normally)
-        api.getBlueprint(projectId).then((bp) => {
-          setBlueprint(bp);
-          setStage("complete");
-        }).catch(() => {
-          setOrchestrationError("Connection lost during analysis.");
-          setStage("error");
-        });
+        // EventSource auto-reconnects — only treat as fatal if we haven't completed
+        // Wait briefly to see if the stream comes back before showing an error
+        setTimeout(() => {
+          if (es.readyState === EventSource.CLOSED) {
+            api.getBlueprint(projectId).then((bp) => {
+              setBlueprint(bp);
+              setStage("complete");
+            }).catch(() => {
+              // Stream dropped before completion — leave as orchestrating,
+              // the backend is still running
+            });
+          }
+        }, 3000);
       };
     }).catch((err) => {
       setOrchestrationError(err.message);
