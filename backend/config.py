@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     supabase_url: str = ""
     supabase_key: str = ""
     github_token: str = ""
-    cors_origins_str: str = "http://localhost:3000,https://foundrybuild.xyz"
+    cors_origins_str: str = "http://localhost:3000,https://foundrybuild.xyz,https://www.foundrybuild.xyz"
     gemini_model: str = "gemini-3.1-flash-lite"
     max_interview_turns: int = 8
 
