@@ -112,8 +112,13 @@ export function Hero() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              const el = document.getElementById("waitlist");
-              el?.scrollIntoView({ behavior: "smooth" });
+              if (value.trim()) {
+                sessionStorage.setItem("foundry_prefill", value.trim());
+                window.location.href = "/studio";
+              } else {
+                const el = document.getElementById("waitlist");
+                el?.scrollIntoView({ behavior: "smooth" });
+              }
             }}
             className="group relative flex items-center rounded-xl border border-[var(--color-border-strong)] bg-[var(--color-surface)] p-1.5 transition-colors focus-within:border-[#3a4250]"
           >
