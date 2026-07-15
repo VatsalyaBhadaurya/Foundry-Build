@@ -35,7 +35,6 @@ When complete, extract all gathered information into structured requirements."""
 class InterviewResponse(BaseModel):
     complete: bool
     question: Optional[str] = None
-    requirements: Optional[dict] = None
     inferred_project_type: str = "software"
 
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { api } from "@/lib/api";
@@ -16,14 +16,15 @@ const EXAMPLES = [
 
 export default function StudioPage() {
   const router = useRouter();
-  const [idea, setIdea] = useState(() => {
-    if (typeof window !== "undefined") {
-      const prefill = sessionStorage.getItem("foundry_prefill") ?? "";
+  const [idea, setIdea] = useState("");
+
+  useEffect(() => {
+    const prefill = sessionStorage.getItem("foundry_prefill") ?? "";
+    if (prefill) {
       sessionStorage.removeItem("foundry_prefill");
-      return prefill;
+      setIdea(prefill);
     }
-    return "";
-  });
+  }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 

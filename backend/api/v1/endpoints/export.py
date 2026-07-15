@@ -50,6 +50,42 @@ async def export_readme(project_id: str):
     )
 
 
+_UNICODE_MAP = {
+    "→": "->", "←": "<-", "↑": "^", "↓": "v", "↔": "<->",
+    "⟶": "->", "⟵": "<-", "⇒": "=>", "⇐": "<=",
+    "•": "-", "·": "-", "‣": "-", "▸": ">",
+    "—": "--", "–": "-", "…": "...",
+    "“": '"', "”": '"', "‘": "'", "’": "'",
+    "≥": ">=", "≤": "<=", "≈": "~", "≠": "!=",
+    "×": "x", "÷": "/", "°": "deg",
+    "™": "(TM)", "®": "(R)", "©": "(C)",
+    "€": "EUR", "£": "GBP", "¥": "JPY",
+    "✓": "OK", "✔": "OK", "✗": "X", "✘": "X",
+    "★": "*", "☆": "*", "●": "-", "○": "-",
+    "∞": "inf", "α": "alpha", "β": "beta", "λ": "lambda",
+    "μ": "mu", "π": "pi", "σ": "sigma",
+    "​": "", " ": " ", " ": " ", " ": " ",
+}
+
+
+def _latin1_safe(text: str) -> str:
+    for ch, rep in _UNICODE_MAP.items():
+        text = text.replace(ch, rep)
+    # Replace any remaining non-latin1 chars with '?'
+    return text.encode("latin-1", errors="replace").decode("latin-1")
+
+
+def _sanitize_html(html: str) -> str:
+    import re, html as html_mod
+    # Unescape all HTML entities first so we can normalize them
+    unescaped = html_mod.unescape(html)
+    # Apply our char map to the unescaped text (preserving tags)
+    for ch, rep in _UNICODE_MAP.items():
+        unescaped = unescaped.replace(ch, rep)
+    # Encode to latin-1, replacing unknown chars — tags are ASCII so they survive
+    return unescaped.encode("latin-1", errors="replace").decode("latin-1")
+
+
 @router.get("/{project_id}/pdf")
 async def export_pdf(project_id: str):
     """Export blueprint as PDF."""
@@ -65,18 +101,18 @@ async def export_pdf(project_id: str):
         from fpdf import FPDF
         import markdown2
 
+        safe_md = _latin1_safe(project.blueprint.markdown)
         html = markdown2.markdown(
-            project.blueprint.markdown,
+            safe_md,
             extras=["tables", "fenced-code-blocks", "header-ids"],
         )
+        safe_html = _sanitize_html(html)
 
         pdf = FPDF()
         pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
         pdf.set_font("Helvetica", size=11)
-
-        # fpdf2 write_html for rich content
-        pdf.write_html(html)
+        pdf.write_html(safe_html)
 
         pdf_bytes = pdf.output()
         slug = project.idea[:40].lower().replace(" ", "-")
