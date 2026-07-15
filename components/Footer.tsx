@@ -39,14 +39,17 @@ export function Footer() {
         <div className="text-sm">
           <p className="mb-3 font-medium text-[var(--color-text)]">Contact</p>
           <p className="text-[var(--color-text-muted)]">Vatsalya Bhadaurya</p>
-          <a
-            href="https://www.vatsalyaaa.me"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-block text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
-          >
-            www.vatsalyaaa.me
-          </a>
+          <div className="mt-2 flex flex-col gap-1.5">
+            <a href="mailto:vatsalya@nextgenrl.com" className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]">
+              vatsalya@nextgenrl.com
+            </a>
+            <a href="https://www.linkedin.com/in/vatsalya-bhadaurya/" target="_blank" rel="noopener noreferrer" className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]">
+              LinkedIn
+            </a>
+            <a href="https://github.com/VatsalyaBhadaurya" target="_blank" rel="noopener noreferrer" className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]">
+              GitHub
+            </a>
+          </div>
         </div>
       </div>
 
