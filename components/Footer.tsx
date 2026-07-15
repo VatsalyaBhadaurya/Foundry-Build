@@ -1,9 +1,4 @@
-const LINKS = [
-  { label: "Vision", href: "#vision" },
-  { label: "Roadmap", href: "#solution" },
-  { label: "GitHub", href: "https://github.com/VatsalyaBhadaurya/Foundry-Build" },
-  { label: "Contact", href: "#waitlist" },
-];
+const LINKS: { label: string; href: string }[] = [];
 
 const COMPANY = "Nextgen Research Lab And Infrastructure Development Pvt Ltd";
 
@@ -21,20 +16,6 @@ export function Footer() {
           </p>
         </div>
 
-        <nav className="flex flex-wrap gap-x-10 gap-y-3">
-          {LINKS.map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              className="text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
-              {...(l.href.startsWith("http")
-                ? { target: "_blank", rel: "noopener noreferrer" }
-                : {})}
-            >
-              {l.label}
-            </a>
-          ))}
-        </nav>
 
         <div className="text-sm">
           <p className="mb-3 font-medium text-[var(--color-text)]">Contact</p>

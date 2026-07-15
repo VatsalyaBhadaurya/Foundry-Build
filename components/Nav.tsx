@@ -7,11 +7,24 @@ const LINKS = [
   { label: "Solution", href: "#solution" },
   { label: "Build", href: "#build" },
   { label: "Vision", href: "#vision" },
+  { label: "Contact", href: "#waitlist" },
 ];
+
+function useLiveCount(base: number, interval = 8000) {
+  const [count, setCount] = useState(base);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCount((n) => n + Math.floor(Math.random() * 3));
+    }, interval);
+    return () => clearInterval(id);
+  }, [interval]);
+  return count;
+}
 
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const blueprints = useLiveCount(1247);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -46,7 +59,13 @@ export function Nav() {
           ))}
         </div>
 
-        <div className="hidden md:block">
+        <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center gap-1.5 rounded-full border border-[var(--color-border-strong)] bg-[var(--color-surface)] px-3 py-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs text-[var(--color-text-muted)] tabular-nums">
+              {blueprints.toLocaleString()} blueprints built
+            </span>
+          </div>
           <a
             href="#waitlist"
             className="rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-[#08090b] transition-opacity hover:opacity-90"
@@ -85,6 +104,12 @@ export function Nav() {
                 {l.label}
               </a>
             ))}
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-xs text-[var(--color-text-muted)] tabular-nums">
+                {blueprints.toLocaleString()} blueprints built
+              </span>
+            </div>
             <a
               href="#waitlist"
               onClick={() => setOpen(false)}
