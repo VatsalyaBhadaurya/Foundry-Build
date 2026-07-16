@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 const LINKS = [
   { label: "Problem", href: "#problem" },
@@ -135,16 +136,8 @@ export function Nav() {
 
 function Logo() {
   return (
-    <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border-strong)] bg-[var(--color-surface-2)]">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
-        <path
-          d="M8 1.5l5.5 3.2v6.6L8 14.5 2.5 11.3V4.7L8 1.5z"
-          stroke="currentColor"
-          strokeWidth="1.2"
-          strokeLinejoin="round"
-        />
-        <path d="M8 5.2v5.6M5.4 6.6l5.2 2.8M10.6 6.6L5.4 9.4" stroke="currentColor" strokeWidth="1.2" />
-      </svg>
+    <span className="flex h-7 w-7 items-center justify-center rounded-md overflow-hidden">
+      <Image src="/logo.png" alt="FoundryBuild" width={28} height={28} className="object-contain" priority />
     </span>
   );
 }

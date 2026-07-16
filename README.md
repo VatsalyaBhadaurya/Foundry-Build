@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="logo.png" alt="FoundryBuild Logo" width="140" />
+
 <img src=".github/assets/banner.svg" alt="FoundryBuild — Build Anything." width="100%" />
 
 <h1>FoundryBuild</h1>

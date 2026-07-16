@@ -32,6 +32,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "FoundryBuild" }],
   alternates: { canonical: SITE_URL },
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
     type: "website",
     url: SITE_URL,
@@ -39,12 +44,14 @@ export const metadata: Metadata = {
     description:
       "From software and AI systems to robotics, electronics, products, and machines. FoundryBuild generates structured plans, architectures, dependencies, and execution paths.",
     siteName: "FoundryBuild",
+    images: [{ url: "/logo.png", width: 1080, height: 1080, alt: "FoundryBuild" }],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "FoundryBuild — Turn ideas into buildable reality",
     description:
       "Describe what you want to create. FoundryBuild generates structured build plans from intent to execution.",
+    images: ["/logo.png"],
   },
   robots: { index: true, follow: true },
 };
