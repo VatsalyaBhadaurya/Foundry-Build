@@ -50,6 +50,7 @@ async def stream_orchestration(project_id: str):
         from agents.risk.agent import RiskAgent
         from agents.devils_advocate.agent import DevilsAdvocateAgent, DevilsAdvocateInput
         from agents.blueprint.agent import BlueprintAgent, SynthesisInput
+        from agents.talent.agent import TalentFinderAgent
         from shared.schemas import Blueprint
 
         # Single queue — only run_all writes, only generate() reads
@@ -85,6 +86,7 @@ async def stream_orchestration(project_id: str):
                 "Roadmap":      RoadmapAgent().run(requirements),
                 "SkillGap":     SkillGapAgent().run(requirements),
                 "Risk":         RiskAgent().run(requirements),
+                "TalentFinder": TalentFinderAgent().run(requirements),
             }
             phase1_events = [asyncio.Event() for _ in phase1_agents]
             tasks = [
@@ -126,6 +128,7 @@ async def stream_orchestration(project_id: str):
                     github_output=results.get("GitHub", {}),
                     research_output=results.get("Research", {}),
                     devils_advocate_output=results.get("DevilsAdvocate", {}),
+                    talent_output=results.get("TalentFinder") or None,
                 )
                 bp = await BlueprintAgent().run(synthesis)
                 blueprint_result = bp.model_dump()
