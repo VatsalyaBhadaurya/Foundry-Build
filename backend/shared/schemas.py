@@ -152,6 +152,7 @@ class Blueprint(BaseModel):
     three_designs: list[DesignVariant]
     devil_critique: DevilCritique
     feasibility: FeasibilityScores
+    architecture_diagram: str = ""
     markdown: str
     created_at: str
 

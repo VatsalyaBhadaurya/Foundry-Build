@@ -67,6 +67,7 @@ export interface Blueprint {
   three_designs: DesignVariant[];
   devil_critique: DevilCritique;
   feasibility: FeasibilityScores;
+  architecture_diagram: string;
   markdown: string;
   created_at: string;
 }

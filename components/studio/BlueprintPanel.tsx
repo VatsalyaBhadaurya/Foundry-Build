@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Blueprint, DesignVariant, Risk, Milestone } from "@/lib/api";
 import { api } from "@/lib/api";
@@ -164,9 +164,78 @@ function OverviewSection({ blueprint }: { blueprint: Blueprint }) {
   );
 }
 
+function MermaidDiagram({ chart }: { chart: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [status, setStatus] = useState<"loading" | "done" | "error">("loading");
+
+  useEffect(() => {
+    if (!chart) { setStatus("done"); return; }
+    let cancelled = false;
+
+    import("mermaid")
+      .then(({ default: mermaid }) => {
+        if (cancelled) return;
+        mermaid.initialize({
+          startOnLoad: false,
+          look: "handDrawn",
+          theme: "neutral",
+          securityLevel: "loose",
+          flowchart: { useMaxWidth: true, htmlLabels: false },
+          fontFamily: "ui-sans-serif, system-ui, sans-serif",
+        });
+        const id = `mermaid-${Date.now()}`;
+        return mermaid.render(id, chart);
+      })
+      .then((result) => {
+        if (!result || cancelled || !ref.current) return;
+        ref.current.innerHTML = result.svg;
+        const svgEl = ref.current.querySelector("svg");
+        if (svgEl) {
+          svgEl.style.width = "100%";
+          svgEl.style.height = "auto";
+          svgEl.style.maxWidth = "100%";
+        }
+        if (!cancelled) setStatus("done");
+      })
+      .catch(() => { if (!cancelled) setStatus("error"); });
+
+    return () => { cancelled = true; };
+  }, [chart]);
+
+  if (!chart) return null;
+
+  return (
+    <div className="w-full rounded-xl overflow-hidden border border-[#e2e4e7] bg-white shadow-sm">
+      <div className="px-4 py-2.5 border-b border-[#e2e4e7] bg-[#f8f9fa] flex items-center gap-2">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        <span className="text-[11px] font-medium text-[#6b7280] uppercase tracking-wider">System Architecture</span>
+      </div>
+      <div className="p-6">
+        {status === "loading" && (
+          <div className="flex items-center justify-center py-16">
+            <span className="text-xs text-gray-400 animate-pulse">Rendering diagram…</span>
+          </div>
+        )}
+        {status === "error" && (
+          <div className="space-y-2">
+            <p className="text-xs text-gray-400 font-medium">Diagram source:</p>
+            <pre className="text-xs text-gray-500 whitespace-pre-wrap font-mono leading-relaxed bg-gray-50 rounded-lg p-4 overflow-x-auto">
+              {chart}
+            </pre>
+          </div>
+        )}
+        <div ref={ref} className={status !== "done" ? "hidden" : ""} />
+      </div>
+    </div>
+  );
+}
+
 function ArchitectureSection({ blueprint }: { blueprint: Blueprint }) {
   return (
     <div className="space-y-4">
+      {blueprint.architecture_diagram && (
+        <MermaidDiagram chart={blueprint.architecture_diagram} />
+      )}
       <SectionCard title="System Architecture">
         <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">{blueprint.system_architecture}</p>
       </SectionCard>
