@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Blueprint, DesignVariant, Risk, Milestone } from "@/lib/api";
+import { Blueprint, DesignVariant, Risk, Milestone, TalentFinderOutput, PersonProfile, Community } from "@/lib/api";
 import { api } from "@/lib/api";
 
 interface Props {
@@ -17,6 +17,7 @@ const SECTIONS = [
   "Costs",
   "Risks",
   "Skills",
+  "Team",
   "Resources",
   "Critique",
   "Feasibility",
@@ -68,6 +69,7 @@ export function BlueprintPanel({ blueprint, projectId }: Props) {
         {activeSection === "Costs" && <CostsSection blueprint={blueprint} />}
         {activeSection === "Risks" && <RisksSection risks={blueprint.risks} />}
         {activeSection === "Skills" && <SkillsSection blueprint={blueprint} />}
+        {activeSection === "Team" && <TeamSection talent={blueprint.talent} />}
         {activeSection === "Resources" && <ResourcesSection blueprint={blueprint} />}
         {activeSection === "Critique" && <CritiqueSection blueprint={blueprint} />}
         {activeSection === "Feasibility" && <FeasibilitySection blueprint={blueprint} />}
@@ -620,6 +622,119 @@ function FeasibilitySection({ blueprint }: { blueprint: Blueprint }) {
       <SectionCard title="Overall Recommendation">
         <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">{f.overall_recommendation}</p>
       </SectionCard>
+    </div>
+  );
+}
+
+function TeamSection({ talent }: { talent?: TalentFinderOutput }) {
+  if (!talent) {
+    return (
+      <div className="flex items-center justify-center py-20 text-[var(--color-text-faint)] text-sm">
+        Team analysis not available for this blueprint.
+      </div>
+    );
+  }
+
+  const platformColors: Record<string, string> = {
+    GitHub: "bg-[#24292e] text-white",
+    LinkedIn: "bg-[#0077b5] text-white",
+    Twitter: "bg-[#1da1f2] text-white",
+    Reddit: "bg-[#ff4500] text-white",
+    Discord: "bg-[#5865f2] text-white",
+    Slack: "bg-[#4a154b] text-white",
+  };
+
+  return (
+    <div className="space-y-6">
+      {talent.key_roles_needed.length > 0 && (
+        <SectionCard title="Key Roles Needed">
+          <div className="flex flex-wrap gap-2">
+            {talent.key_roles_needed.map((role, i) => (
+              <span key={i} className="rounded-full border border-[var(--color-border-strong)] bg-[var(--color-surface-2)] px-3 py-1 text-xs font-medium text-[var(--color-text)]">
+                {role}
+              </span>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {talent.notable_people.length > 0 && (
+        <SectionCard title="Notable People & Experts">
+          <div className="space-y-3">
+            {talent.notable_people.map((person, i) => (
+              <div key={i} className="flex items-start gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] p-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-border-strong)] text-sm font-semibold text-[var(--color-text)]">
+                  {(person.name || "?")[0].toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {person.profile_url ? (
+                      <a href={person.profile_url} target="_blank" rel="noopener noreferrer"
+                        className="text-sm font-semibold text-[var(--color-text)] hover:underline">
+                        {person.name || "Unknown"}
+                      </a>
+                    ) : (
+                      <span className="text-sm font-semibold text-[var(--color-text)]">{person.name || "Unknown"}</span>
+                    )}
+                    <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${platformColors[person.platform] ?? "bg-[var(--color-border-strong)] text-[var(--color-text-muted)]"}`}>
+                      {person.platform}
+                    </span>
+                  </div>
+                  {person.role && <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{person.role}</p>}
+                  {person.relevance && <p className="text-xs text-[var(--color-text-faint)] mt-1">{person.relevance}</p>}
+                  {person.expertise.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {person.expertise.map((e, j) => (
+                        <span key={j} className="rounded bg-[var(--color-border)] px-1.5 py-0.5 text-[10px] text-[var(--color-text-muted)]">{e}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {talent.communities.length > 0 && (
+        <SectionCard title="Communities to Join">
+          <div className="space-y-3">
+            {talent.communities.map((c, i) => (
+              <div key={i} className="flex items-start gap-3 rounded-lg border border-[var(--color-border)] p-3">
+                <span className={`mt-0.5 rounded px-2 py-0.5 text-[10px] font-semibold shrink-0 ${platformColors[c.platform] ?? "bg-[var(--color-border-strong)] text-[var(--color-text-muted)]"}`}>
+                  {c.platform}
+                </span>
+                <div className="min-w-0">
+                  {c.url ? (
+                    <a href={c.url} target="_blank" rel="noopener noreferrer"
+                      className="text-sm font-medium text-[var(--color-text)] hover:underline">{c.name}</a>
+                  ) : (
+                    <span className="text-sm font-medium text-[var(--color-text)]">{c.name}</span>
+                  )}
+                  {c.description && <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{c.description}</p>}
+                  {c.why_relevant && <p className="text-xs text-[var(--color-text-faint)] mt-1">{c.why_relevant}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {talent.hiring_platforms.length > 0 && (
+        <SectionCard title="Where to Hire">
+          <div className="flex flex-wrap gap-2">
+            {talent.hiring_platforms.map((p, i) => (
+              <span key={i} className="rounded-full border border-[var(--color-border-strong)] bg-[var(--color-surface-2)] px-3 py-1 text-xs text-[var(--color-text-muted)]">{p}</span>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {talent.outreach_tips && (
+        <SectionCard title="Outreach Tips">
+          <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">{talent.outreach_tips}</p>
+        </SectionCard>
+      )}
     </div>
   );
 }

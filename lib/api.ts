@@ -68,8 +68,35 @@ export interface Blueprint {
   devil_critique: DevilCritique;
   feasibility: FeasibilityScores;
   architecture_diagram: string;
+  talent?: TalentFinderOutput;
   markdown: string;
   created_at: string;
+}
+
+export interface PersonProfile {
+  name: string;
+  role: string;
+  platform: string;
+  profile_url: string;
+  expertise: string[];
+  relevance: string;
+}
+
+export interface Community {
+  name: string;
+  platform: string;
+  url: string;
+  description: string;
+  why_relevant: string;
+}
+
+export interface TalentFinderOutput {
+  key_roles_needed: string[];
+  notable_people: PersonProfile[];
+  communities: Community[];
+  github_search_queries: string[];
+  hiring_platforms: string[];
+  outreach_tips: string;
 }
 
 export interface Milestone {

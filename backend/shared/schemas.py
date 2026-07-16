@@ -116,6 +116,32 @@ class FeasibilityScores(BaseModel):
     explanations: FeasibilityExplanations = Field(default_factory=FeasibilityExplanations)
 
 
+class PersonProfile(BaseModel):
+    name: str = ""
+    role: str = ""
+    platform: str = ""
+    profile_url: str = ""
+    expertise: list[str] = Field(default_factory=list)
+    relevance: str = ""
+
+
+class Community(BaseModel):
+    name: str = ""
+    platform: str = ""
+    url: str = ""
+    description: str = ""
+    why_relevant: str = ""
+
+
+class TalentFinderOutput(BaseModel):
+    key_roles_needed: list[str] = Field(default_factory=list)
+    notable_people: list[PersonProfile] = Field(default_factory=list)
+    communities: list[Community] = Field(default_factory=list)
+    github_search_queries: list[str] = Field(default_factory=list)
+    hiring_platforms: list[str] = Field(default_factory=list)
+    outreach_tips: str = ""
+
+
 class DevilCritique(BaseModel):
     wrong_assumptions: list[str]
     failure_points: list[str]
@@ -153,6 +179,7 @@ class Blueprint(BaseModel):
     devil_critique: DevilCritique
     feasibility: FeasibilityScores
     architecture_diagram: str = ""
+    talent: Optional[TalentFinderOutput] = None
     markdown: str
     created_at: str
 

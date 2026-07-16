@@ -14,6 +14,7 @@ from agents.skill_gap.agent import SkillGapAgent
 from agents.risk.agent import RiskAgent
 from agents.devils_advocate.agent import DevilsAdvocateAgent, DevilsAdvocateInput
 from agents.blueprint.agent import BlueprintAgent, SynthesisInput
+from agents.talent.agent import TalentFinderAgent
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,7 @@ async def orchestrate(
         "Roadmap": RoadmapAgent().run(requirements),
         "SkillGap": SkillGapAgent().run(requirements),
         "Risk": RiskAgent().run(requirements),
+        "TalentFinder": TalentFinderAgent().run(requirements),
     }
 
     tasks = [
@@ -123,6 +125,7 @@ async def orchestrate(
         github_output=results.get("GitHub", {}),
         research_output=results.get("Research", {}),
         devils_advocate_output=results.get("DevilsAdvocate", {}),
+        talent_output=results.get("TalentFinder", {}),
     )
 
     yield OrchestratorEvent("start", "Blueprint")
