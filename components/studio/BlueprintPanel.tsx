@@ -164,6 +164,8 @@ function OverviewSection({ blueprint }: { blueprint: Blueprint }) {
   );
 }
 
+const MERMAID_CDN = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
+
 function MermaidDiagram({ chart }: { chart: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "done" | "error">("loading");
@@ -172,32 +174,36 @@ function MermaidDiagram({ chart }: { chart: string }) {
     if (!chart) { setStatus("done"); return; }
     let cancelled = false;
 
-    import("mermaid")
-      .then(({ default: mermaid }) => {
-        if (cancelled) return;
-        mermaid.initialize({
-          startOnLoad: false,
-          look: "handDrawn",
-          theme: "neutral",
-          securityLevel: "loose",
-          flowchart: { useMaxWidth: true, htmlLabels: false },
-          fontFamily: "ui-sans-serif, system-ui, sans-serif",
-        });
-        const id = `mermaid-${Date.now()}`;
-        return mermaid.render(id, chart);
-      })
-      .then((result) => {
-        if (!result || cancelled || !ref.current) return;
-        ref.current.innerHTML = result.svg;
-        const svgEl = ref.current.querySelector("svg");
-        if (svgEl) {
-          svgEl.style.width = "100%";
-          svgEl.style.height = "auto";
-          svgEl.style.maxWidth = "100%";
-        }
-        if (!cancelled) setStatus("done");
-      })
-      .catch(() => { if (!cancelled) setStatus("error"); });
+    const render = () => {
+      const m = (window as any).mermaid;
+      m.initialize({
+        startOnLoad: false,
+        look: "handDrawn",
+        theme: "neutral",
+        securityLevel: "loose",
+        flowchart: { useMaxWidth: true, htmlLabels: false },
+      });
+      const id = `mermaid-${Date.now()}`;
+      m.render(id, chart)
+        .then(({ svg }: { svg: string }) => {
+          if (cancelled || !ref.current) return;
+          ref.current.innerHTML = svg;
+          const svgEl = ref.current.querySelector("svg");
+          if (svgEl) { svgEl.style.width = "100%"; svgEl.style.height = "auto"; }
+          if (!cancelled) setStatus("done");
+        })
+        .catch(() => { if (!cancelled) setStatus("error"); });
+    };
+
+    if ((window as any).mermaid) {
+      render();
+    } else {
+      const script = document.createElement("script");
+      script.src = MERMAID_CDN;
+      script.onload = render;
+      script.onerror = () => { if (!cancelled) setStatus("error"); };
+      document.head.appendChild(script);
+    }
 
     return () => { cancelled = true; };
   }, [chart]);
