@@ -34,7 +34,7 @@ class SynthesisInput(BaseModel):
     github_output: dict
     research_output: dict
     devils_advocate_output: dict
-    talent_output: dict = {}
+    talent_output: dict | None = None
 
 
 class SynthesisCore(BaseModel):
@@ -148,7 +148,7 @@ Feasibility: {json.dumps(core.feasibility.model_dump())}""",
             constraints=req.get("constraints", []),
             system_architecture=arch.get("core_architecture_description", ""),
             architecture_diagram=arch.get("mermaid_diagram", ""),
-            talent=TalentFinderOutput(**input_data.talent_output) if input_data.talent_output else None,
+            talent=TalentFinderOutput.model_validate(input_data.talent_output) if input_data.talent_output else None,
             tech_stack=arch.get("balanced", {}).get("tech_stack", []),
             hardware=arch.get("balanced", {}).get("hardware", []),
             software_components=arch.get("software_components", []),

@@ -125,7 +125,7 @@ async def orchestrate(
         github_output=results.get("GitHub", {}),
         research_output=results.get("Research", {}),
         devils_advocate_output=results.get("DevilsAdvocate", {}),
-        talent_output=results.get("TalentFinder", {}),
+        talent_output=results.get("TalentFinder") or None,
     )
 
     yield OrchestratorEvent("start", "Blueprint")
