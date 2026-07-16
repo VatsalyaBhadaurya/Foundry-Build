@@ -215,7 +215,7 @@ def _render_table_rows(pdf, rows: list) -> None:
     page_w = pdf.w - pdf.l_margin - pdf.r_margin
 
     # Proportional column widths based on max content length per column
-    col_maxlen = [max(1, len(row[c].strip()) if c < len(row) else 1) for c in range(num_cols)]
+    col_maxlen = [1] * num_cols
     for row in rows:
         for c in range(min(len(row), num_cols)):
             col_maxlen[c] = max(col_maxlen[c], len(row[c].strip()) or 1)
