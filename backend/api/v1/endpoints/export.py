@@ -3,7 +3,7 @@ import logging
 import re
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
-from shared.schemas import Project
+from shared.schemas import Project, Blueprint
 import database.client as db
 
 logger = logging.getLogger(__name__)
@@ -438,6 +438,349 @@ def _render_markdown_pdf(pdf, markdown_text: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Structured blueprint renderer — renders every field directly from Blueprint
+# ---------------------------------------------------------------------------
+
+def _h1(pdf, text: str) -> None:
+    _ensure_space(pdf, 50)
+    heading = _latin1_safe(text)
+    pdf.set_fill_color(*_DARK)
+    pdf.rect(pdf.l_margin - 2, pdf.get_y(), pdf.w - pdf.l_margin - pdf.r_margin + 4, 11, "F")
+    pdf.set_font("Helvetica", "B", 13)
+    pdf.set_text_color(230, 232, 238)
+    pdf.cell(0, 11, f"  {heading}", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_fill_color(255, 255, 255)
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font("Helvetica", size=11)
+    pdf.ln(3)
+
+
+def _h2(pdf, text: str) -> None:
+    _ensure_space(pdf, 38)
+    pdf.ln(1)
+    pdf.set_x(pdf.l_margin)
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.set_text_color(*_ACCENT)
+    pdf.multi_cell(0, 7, _latin1_safe(text))
+    y = pdf.get_y()
+    pdf.set_draw_color(*_ACCENT)
+    pdf.set_line_width(0.4)
+    pdf.line(pdf.l_margin, y, pdf.l_margin + 50, y)
+    pdf.set_line_width(0.2)
+    pdf.set_draw_color(0, 0, 0)
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font("Helvetica", size=11)
+    pdf.ln(2)
+
+
+def _para(pdf, text: str) -> None:
+    pdf.set_x(pdf.l_margin)
+    pdf.set_font("Helvetica", "", 10.5)
+    pdf.set_text_color(30, 30, 40)
+    pdf.multi_cell(0, 5.5, _latin1_safe(_strip_inline(text)))
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(1)
+
+
+def _bullet_list(pdf, items: list[str]) -> None:
+    pdf.set_font("Helvetica", "", 10.5)
+    pdf.set_text_color(30, 30, 40)
+    for item in items:
+        if not item:
+            continue
+        pdf.set_x(pdf.l_margin + 4)
+        pdf.multi_cell(pdf.w - pdf.l_margin - pdf.r_margin - 4, 5.5, f"-  {_latin1_safe(_strip_inline(item))}")
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(1)
+
+
+def _kv(pdf, label: str, value: str) -> None:
+    pdf.set_x(pdf.l_margin)
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.set_text_color(*_DARK)
+    pdf.cell(45, 5.5, _latin1_safe(label) + ":", new_x="RIGHT", new_y="TOP")
+    pdf.set_font("Helvetica", "", 10)
+    pdf.set_text_color(30, 30, 40)
+    pdf.multi_cell(pdf.w - pdf.l_margin - pdf.r_margin - 45, 5.5, _latin1_safe(_strip_inline(value)))
+    pdf.set_text_color(0, 0, 0)
+
+
+def _render_blueprint_structured(pdf, bp: Blueprint) -> None:
+    # ---- Executive Summary ----
+    _h1(pdf, "Executive Summary")
+    _para(pdf, bp.executive_summary)
+
+    # ---- Problem Statement ----
+    _h1(pdf, "Problem Statement")
+    _para(pdf, bp.problem_statement)
+
+    # ---- Objectives ----
+    if bp.objectives:
+        _h1(pdf, "Objectives")
+        _bullet_list(pdf, bp.objectives)
+
+    # ---- Assumptions & Constraints ----
+    if bp.assumptions or bp.constraints:
+        _h1(pdf, "Assumptions & Constraints")
+        if bp.assumptions:
+            _h2(pdf, "Assumptions")
+            _bullet_list(pdf, bp.assumptions)
+        if bp.constraints:
+            _h2(pdf, "Constraints")
+            _bullet_list(pdf, bp.constraints)
+
+    # ---- System Architecture ----
+    _h1(pdf, "System Architecture")
+    _para(pdf, bp.system_architecture)
+
+    # ---- Technology Stack ----
+    _h1(pdf, "Technology Stack")
+    if bp.tech_stack:
+        _h2(pdf, "Core Stack")
+        _bullet_list(pdf, bp.tech_stack)
+    if bp.hardware:
+        _h2(pdf, "Hardware Components")
+        _bullet_list(pdf, bp.hardware)
+    if bp.software_components:
+        _h2(pdf, "Software Components")
+        _bullet_list(pdf, bp.software_components)
+    if bp.apis:
+        _h2(pdf, "APIs & Services")
+        _bullet_list(pdf, bp.apis)
+    if bp.libraries:
+        _h2(pdf, "Libraries & Frameworks")
+        _bullet_list(pdf, bp.libraries)
+    if bp.models:
+        _h2(pdf, "AI Models")
+        _bullet_list(pdf, bp.models)
+    if bp.datasets:
+        _h2(pdf, "Datasets")
+        _bullet_list(pdf, bp.datasets)
+
+    # ---- Development Roadmap ----
+    if bp.roadmap:
+        _h1(pdf, "Development Roadmap")
+        for m in bp.roadmap:
+            _ensure_space(pdf, 40)
+            _h2(pdf, f"Phase {m.phase}: {m.title} ({m.duration_weeks} weeks)")
+            if m.objectives:
+                pdf.set_font("Helvetica", "B", 9.5)
+                pdf.set_text_color(*_DARK)
+                pdf.set_x(pdf.l_margin)
+                pdf.cell(0, 5, "Objectives", new_x="LMARGIN", new_y="NEXT")
+                _bullet_list(pdf, m.objectives)
+            if m.deliverables:
+                pdf.set_font("Helvetica", "B", 9.5)
+                pdf.set_text_color(*_DARK)
+                pdf.set_x(pdf.l_margin)
+                pdf.cell(0, 5, "Deliverables", new_x="LMARGIN", new_y="NEXT")
+                _bullet_list(pdf, m.deliverables)
+            if m.success_criteria:
+                pdf.set_font("Helvetica", "B", 9.5)
+                pdf.set_text_color(*_DARK)
+                pdf.set_x(pdf.l_margin)
+                pdf.cell(0, 5, "Success Criteria", new_x="LMARGIN", new_y="NEXT")
+                _bullet_list(pdf, m.success_criteria)
+            if m.dependencies:
+                pdf.set_font("Helvetica", "B", 9.5)
+                pdf.set_text_color(*_DARK)
+                pdf.set_x(pdf.l_margin)
+                pdf.cell(0, 5, "Dependencies", new_x="LMARGIN", new_y="NEXT")
+                _bullet_list(pdf, m.dependencies)
+            pdf.set_text_color(0, 0, 0)
+
+    # ---- Bill of Materials ----
+    if bp.bom:
+        _h1(pdf, "Bill of Materials & Cost Estimates")
+        _ensure_space(pdf, 25)
+        header = ["Component", "Qty", "Unit Cost (USD)", "Total (USD)", "Notes"]
+        rows = [header]
+        for b in bp.bom:
+            alts = ", ".join(b.alternatives) if b.alternatives else ""
+            note = _latin1_safe(f"{b.notes} {('Alt: ' + alts) if alts else ''}".strip())
+            rows.append([
+                _latin1_safe(b.component),
+                str(b.quantity),
+                f"${b.unit_cost_usd:,.2f}",
+                f"${b.total_cost_usd:,.2f}",
+                note[:60],
+            ])
+        _render_table_rows(pdf, rows)
+
+        # Cost summary
+        _h2(pdf, "Variant Cost Summary")
+        rows2 = [["Variant", "Total (USD)"]]
+        for variant, cost in bp.estimated_cost.items():
+            rows2.append([variant.capitalize(), f"${cost:,.2f}"])
+        _render_table_rows(pdf, rows2)
+
+    # ---- Skill Requirements ----
+    if bp.skill_requirements:
+        _h1(pdf, "Skill Requirements & Gap Analysis")
+        rows = [["Skill", "Level Required", "Have It?", "Learn (weeks)", "Resources"]]
+        for s in bp.skill_requirements:
+            resources = ", ".join(s.resources[:2]) if s.resources else ""
+            rows.append([
+                _latin1_safe(s.skill),
+                s.level_required,
+                "Yes" if s.currently_have else "No",
+                str(s.learning_time_weeks),
+                _latin1_safe(resources)[:50],
+            ])
+        _render_table_rows(pdf, rows)
+
+    # ---- Risk Analysis ----
+    if bp.risks:
+        _h1(pdf, "Risk Analysis")
+        rows = [["Category", "Description", "Likelihood", "Impact", "Mitigation"]]
+        for r in bp.risks:
+            rows.append([
+                _latin1_safe(r.category),
+                _latin1_safe(_strip_inline(r.description))[:80],
+                r.likelihood,
+                r.impact,
+                _latin1_safe(_strip_inline(r.mitigation))[:80],
+            ])
+        _render_table_rows(pdf, rows)
+
+    # ---- Design Variants ----
+    if bp.three_designs:
+        _h1(pdf, "Three Design Alternatives")
+        for d in bp.three_designs:
+            _ensure_space(pdf, 45)
+            _h2(pdf, f"{d.label} — Est. ${d.estimated_cost_usd:,.0f}")
+            _kv(pdf, "Complexity", d.complexity)
+            _kv(pdf, "Performance", _strip_inline(d.performance))
+            if d.tech_stack:
+                pdf.set_font("Helvetica", "B", 9.5)
+                pdf.set_text_color(*_DARK)
+                pdf.set_x(pdf.l_margin)
+                pdf.cell(0, 5, "Tech Stack", new_x="LMARGIN", new_y="NEXT")
+                _bullet_list(pdf, d.tech_stack)
+            if d.advantages:
+                pdf.set_font("Helvetica", "B", 9.5)
+                pdf.set_text_color(*_DARK)
+                pdf.set_x(pdf.l_margin)
+                pdf.cell(0, 5, "Advantages", new_x="LMARGIN", new_y="NEXT")
+                _bullet_list(pdf, d.advantages)
+            if d.disadvantages:
+                pdf.set_font("Helvetica", "B", 9.5)
+                pdf.set_text_color(*_DARK)
+                pdf.set_x(pdf.l_margin)
+                pdf.cell(0, 5, "Disadvantages", new_x="LMARGIN", new_y="NEXT")
+                _bullet_list(pdf, d.disadvantages)
+            pdf.set_text_color(0, 0, 0)
+
+    # ---- Devil's Advocate ----
+    dc = bp.devil_critique
+    if dc:
+        _h1(pdf, "Devil's Advocate Critique")
+        sections_dc = [
+            ("Wrong Assumptions", dc.wrong_assumptions),
+            ("Failure Points", dc.failure_points),
+            ("Over-Engineered", dc.over_engineered),
+            ("Under-Engineered", dc.under_engineered),
+            ("Hidden Costs", dc.hidden_costs),
+            ("Simplifications", dc.simplifications),
+            ("Senior Engineer Challenges", dc.senior_challenges),
+        ]
+        for title, items in sections_dc:
+            if items:
+                _h2(pdf, title)
+                _bullet_list(pdf, items)
+
+    # ---- Feasibility ----
+    f = bp.feasibility
+    if f:
+        _h1(pdf, "Feasibility Assessment")
+        rows = [["Dimension", "Score", "Explanation"]]
+        dims = [
+            ("Technical Feasibility", f.technical_feasibility, f.explanations.technical_feasibility if f.explanations else ""),
+            ("Commercial Potential", f.commercial_potential, f.explanations.commercial_potential if f.explanations else ""),
+            ("Innovation", f.innovation, f.explanations.innovation if f.explanations else ""),
+            ("Complexity", f.complexity, f.explanations.complexity if f.explanations else ""),
+            ("Scalability", f.scalability, f.explanations.scalability if f.explanations else ""),
+            ("Maintainability", f.maintainability, f.explanations.maintainability if f.explanations else ""),
+        ]
+        for name, score, expl in dims:
+            rows.append([name, f"{score}/100", _latin1_safe(_strip_inline(expl))[:100]])
+        _render_table_rows(pdf, rows)
+        _h2(pdf, "Overall Recommendation")
+        _para(pdf, f.overall_recommendation)
+
+    # ---- GitHub Resources ----
+    if bp.github_repos:
+        _h1(pdf, "GitHub Resources")
+        rows = [["Repository", "Stars", "Language", "Relevance"]]
+        for r in bp.github_repos:
+            rows.append([
+                _latin1_safe(r.name),
+                f"{r.stars:,}" if r.stars else "-",
+                _latin1_safe(r.language or "-"),
+                _latin1_safe(_strip_inline(r.relevance))[:80],
+            ])
+        _render_table_rows(pdf, rows)
+
+    # ---- Research References ----
+    if bp.research_papers:
+        _h1(pdf, "Research References")
+        for p in bp.research_papers:
+            _ensure_space(pdf, 20)
+            authors = ", ".join(p.authors[:3]) + (" et al." if len(p.authors) > 3 else "")
+            year = f" ({p.year})" if p.year else ""
+            _kv(pdf, "Title", p.title)
+            if authors:
+                _kv(pdf, "Authors", authors + year)
+            if p.url:
+                _kv(pdf, "URL", p.url[:80])
+            if p.abstract:
+                _kv(pdf, "Abstract", _strip_inline(p.abstract)[:200])
+            if p.relevance:
+                _kv(pdf, "Relevance", _strip_inline(p.relevance))
+            pdf.ln(3)
+
+    # ---- Future Work ----
+    if bp.future_work:
+        _h1(pdf, "Future Work")
+        _bullet_list(pdf, bp.future_work)
+
+    # ---- Team & People ----
+    if bp.talent:
+        t = bp.talent
+        _h1(pdf, "Team & People")
+        if t.key_roles_needed:
+            _h2(pdf, "Key Roles Needed")
+            _bullet_list(pdf, t.key_roles_needed)
+        if t.notable_people:
+            _h2(pdf, "Notable Experts")
+            rows = [["Name", "Platform", "Role", "Relevance"]]
+            for p in t.notable_people:
+                rows.append([
+                    _latin1_safe(p.name or "-"),
+                    _latin1_safe(p.platform or "-"),
+                    _latin1_safe(p.role or "-"),
+                    _latin1_safe(_strip_inline(p.relevance or "-"))[:60],
+                ])
+            _render_table_rows(pdf, rows)
+        if t.communities:
+            _h2(pdf, "Communities")
+            rows = [["Community", "Platform", "Description"]]
+            for c in t.communities:
+                rows.append([
+                    _latin1_safe(c.name or "-"),
+                    _latin1_safe(c.platform or "-"),
+                    _latin1_safe(_strip_inline(c.description or "-"))[:80],
+                ])
+            _render_table_rows(pdf, rows)
+        if t.hiring_platforms:
+            _h2(pdf, "Where to Hire")
+            _bullet_list(pdf, t.hiring_platforms)
+        if t.outreach_tips:
+            _h2(pdf, "Outreach Tips")
+            _para(pdf, t.outreach_tips)
+
+
+# ---------------------------------------------------------------------------
 # PDF export endpoint
 # ---------------------------------------------------------------------------
 
@@ -459,9 +802,9 @@ async def export_pdf(project_id: str):
         # Cover page
         _draw_cover(pdf, project.idea, bp.created_at)
 
-        # Content pages
+        # Content pages — render from structured fields for completeness
         pdf.add_page()
-        _render_markdown_pdf(pdf, bp.markdown)
+        _render_blueprint_structured(pdf, bp)
 
         pdf_bytes = pdf.output()
         slug = project.idea[:40].lower().replace(" ", "-")
