@@ -93,7 +93,6 @@ _B_MARGIN = 18  # leaves room for footer
 _DARK = (15, 17, 22)
 _ACCENT = (30, 70, 160)
 _GRAY = (130, 130, 140)
-_LIGHT_BG = (245, 246, 248)
 
 
 class _PDF:
@@ -162,7 +161,7 @@ def _draw_cover(pdf, idea: str, created_at: str) -> None:
     pdf.cell(0, 7, "FoundryBuild AI", align="C", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("Helvetica", "", 8)
     pdf.set_text_color(100, 110, 130)
-    pdf.cell(0, 5, "foundrybuild.xyz", align="C")
+    pdf.cell(0, 5, "foundrybuild.xyz", align="C", new_x="LMARGIN", new_y="NEXT")
 
     # Main title area (white background, subtle border)
     pdf.set_fill_color(255, 255, 255)
@@ -170,6 +169,7 @@ def _draw_cover(pdf, idea: str, created_at: str) -> None:
     pdf.rect(_L_MARGIN, 65, pdf.w - _L_MARGIN - _R_MARGIN, 85, "FD")
 
     pdf.set_y(75)
+    pdf.set_x(_L_MARGIN)
     pdf.set_font("Helvetica", "B", 20)
     pdf.set_text_color(*_DARK)
     safe_idea = _latin1_safe(idea[:100])
@@ -221,15 +221,11 @@ def _render_table_rows(pdf, rows: list) -> None:
             col_maxlen[c] = max(col_maxlen[c], len(row[c].strip()) or 1)
     total_len = sum(col_maxlen) or 1
     raw_widths = [(l / total_len) * page_w for l in col_maxlen]
-    # Enforce minimum 12mm per column, then scale to fit page exactly
-    MIN_COL = 12.0
+    # Clamp each column to at least 10mm, then normalize to exactly page_w
+    MIN_COL = 10.0
     col_widths = [max(w, MIN_COL) for w in raw_widths]
     total_w = sum(col_widths)
-    if total_w > 0:
-        col_widths = [max(w * page_w / total_w, MIN_COL) for w in col_widths]
-    # Final normalize so columns fill exactly page_w
-    total_w = sum(col_widths)
-    col_widths = [w * page_w / total_w for w in col_widths] if total_w > 0 else [page_w / num_cols] * num_cols
+    col_widths = [w * page_w / total_w for w in col_widths]
 
     cell_h = 6.5
 
@@ -262,7 +258,6 @@ def _render_table_rows(pdf, rows: list) -> None:
     pdf.set_font("Helvetica", size=11)
     pdf.set_fill_color(255, 255, 255)
     pdf.set_text_color(0, 0, 0)
-    pdf.set_x(pdf.l_margin)
     pdf.ln(3)
 
 
@@ -314,9 +309,9 @@ def _render_markdown_pdf(pdf, markdown_text: str) -> None:
                 pdf.set_text_color(30, 30, 40)
                 for cl in code_lines:
                     safe = _latin1_safe(cl) or " "
-                    # Truncate very long lines
                     if len(safe) > 100:
                         safe = safe[:97] + "..."
+                    pdf.set_x(pdf.l_margin)
                     pdf.multi_cell(0, 4.5, safe, fill=True)
                 pdf.set_font("Helvetica", size=11)
                 pdf.set_fill_color(255, 255, 255)
@@ -406,7 +401,6 @@ def _render_markdown_pdf(pdf, markdown_text: str) -> None:
             pdf.set_font("Helvetica", "", 10.5)
             pdf.set_text_color(30, 30, 40)
             # Indent and bullet
-            x_before = pdf.get_x()
             pdf.set_x(pdf.l_margin + 4)
             pdf.multi_cell(pdf.w - pdf.l_margin - pdf.r_margin - 4, 5.5, f"-  {text}")
             pdf.set_text_color(0, 0, 0)
