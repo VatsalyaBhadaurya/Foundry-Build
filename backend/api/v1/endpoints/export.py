@@ -215,16 +215,21 @@ def _render_table_rows(pdf, rows: list) -> None:
     page_w = pdf.w - pdf.l_margin - pdf.r_margin
 
     # Proportional column widths based on max content length per column
-    col_maxlen = [0] * num_cols
+    col_maxlen = [max(1, len(row[c].strip()) if c < len(row) else 1) for c in range(num_cols)]
     for row in rows:
         for c in range(min(len(row), num_cols)):
-            col_maxlen[c] = max(col_maxlen[c], len(row[c].strip()))
+            col_maxlen[c] = max(col_maxlen[c], len(row[c].strip()) or 1)
     total_len = sum(col_maxlen) or 1
     raw_widths = [(l / total_len) * page_w for l in col_maxlen]
-    # Enforce minimum 15mm per column
-    col_widths = [max(w, 15.0) for w in raw_widths]
-    scale = page_w / sum(col_widths)
-    col_widths = [w * scale for w in col_widths]
+    # Enforce minimum 12mm per column, then scale to fit page exactly
+    MIN_COL = 12.0
+    col_widths = [max(w, MIN_COL) for w in raw_widths]
+    total_w = sum(col_widths)
+    if total_w > 0:
+        col_widths = [max(w * page_w / total_w, MIN_COL) for w in col_widths]
+    # Final normalize so columns fill exactly page_w
+    total_w = sum(col_widths)
+    col_widths = [w * page_w / total_w for w in col_widths] if total_w > 0 else [page_w / num_cols] * num_cols
 
     cell_h = 6.5
 
@@ -257,6 +262,7 @@ def _render_table_rows(pdf, rows: list) -> None:
     pdf.set_font("Helvetica", size=11)
     pdf.set_fill_color(255, 255, 255)
     pdf.set_text_color(0, 0, 0)
+    pdf.set_x(pdf.l_margin)
     pdf.ln(3)
 
 
@@ -354,6 +360,7 @@ def _render_markdown_pdf(pdf, markdown_text: str) -> None:
             _ensure_space(pdf, 38)
             heading = _latin1_safe(_strip_inline(stripped[3:]))
             pdf.ln(1)
+            pdf.set_x(pdf.l_margin)
             pdf.set_font("Helvetica", "B", 12)
             pdf.set_text_color(*_ACCENT)
             pdf.multi_cell(0, 7, heading)
@@ -373,6 +380,7 @@ def _render_markdown_pdf(pdf, markdown_text: str) -> None:
             _ensure_space(pdf, 28)
             heading = _latin1_safe(_strip_inline(stripped[4:]))
             pdf.ln(1)
+            pdf.set_x(pdf.l_margin)
             pdf.set_font("Helvetica", "B", 11)
             pdf.set_text_color(40, 50, 70)
             pdf.multi_cell(0, 6.5, heading)
@@ -385,6 +393,7 @@ def _render_markdown_pdf(pdf, markdown_text: str) -> None:
             _ensure_space(pdf, 22)
             m = re.match(r"^(#{4,}) ", stripped)
             rest = _latin1_safe(_strip_inline(stripped[len(m.group(1)) + 1:]))
+            pdf.set_x(pdf.l_margin)
             pdf.set_font("Helvetica", "BI", 10)
             pdf.set_text_color(60, 70, 90)
             pdf.multi_cell(0, 6, rest)
@@ -424,6 +433,7 @@ def _render_markdown_pdf(pdf, markdown_text: str) -> None:
         # --- Regular paragraph ---
         else:
             text = _latin1_safe(_strip_inline(stripped))
+            pdf.set_x(pdf.l_margin)
             pdf.set_font("Helvetica", "", 10.5)
             pdf.set_text_color(30, 30, 40)
             pdf.multi_cell(0, 5.5, text)
