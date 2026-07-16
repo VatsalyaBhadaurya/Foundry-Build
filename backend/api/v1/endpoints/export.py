@@ -113,7 +113,7 @@ class _PDF:
                 self_inner.set_y(8)
                 self_inner.set_font("Helvetica", "", 7.5)
                 self_inner.set_text_color(*_GRAY)
-                self_inner.cell(self_inner.epw / 2, 5, "FoundryBuild AI  —  Engineering Blueprint", align="L")
+                self_inner.cell(self_inner.epw / 2, 5, "FoundryBuild AI  --  Engineering Blueprint", align="L")
                 self_inner.cell(self_inner.epw / 2, 5, idea_short, align="R", new_x="LMARGIN", new_y="NEXT")
                 y = self_inner.get_y()
                 self_inner.set_draw_color(200, 202, 208)
@@ -184,7 +184,7 @@ def _draw_cover(pdf, idea: str, created_at: str) -> None:
     pdf.set_y(160)
     pdf.set_font("Helvetica", "", 9)
     pdf.set_text_color(*_GRAY)
-    date_str = created_at[:10] if created_at else "—"
+    date_str = created_at[:10] if created_at else "-"
     pdf.cell(0, 6, f"Generated  {date_str}", align="C", new_x="LMARGIN", new_y="NEXT")
 
     # Bottom accent strip
@@ -399,7 +399,7 @@ def _render_markdown_pdf(pdf, markdown_text: str) -> None:
             # Indent and bullet
             x_before = pdf.get_x()
             pdf.set_x(pdf.l_margin + 4)
-            pdf.multi_cell(pdf.w - pdf.l_margin - pdf.r_margin - 4, 5.5, f"•  {text}")
+            pdf.multi_cell(pdf.w - pdf.l_margin - pdf.r_margin - 4, 5.5, f"-  {text}")
             pdf.set_text_color(0, 0, 0)
 
         # --- Numbered list item ---
