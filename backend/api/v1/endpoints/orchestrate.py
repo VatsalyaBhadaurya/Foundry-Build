@@ -1,12 +1,15 @@
 from __future__ import annotations
+
 import asyncio
 import json
 import logging
 from datetime import datetime, timezone
+
 from fastapi import APIRouter, HTTPException
 from sse_starlette.sse import EventSourceResponse
-from shared.schemas import Project
+
 import database.client as db
+from shared.schemas import Project
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/orchestrate", tags=["orchestrate"])
@@ -40,16 +43,19 @@ async def stream_orchestration(project_id: str):
     requirements = project.interview.requirements
 
     async def generate():
-        from agents.planner.agent import PlannerAgent
-        from agents.github.agent import GitHubAgent
-        from agents.research.agent import ResearchAgent
-        from agents.budget.agent import BudgetAgent
         from agents.architecture.agent import ArchitectureAgent
+        from agents.blueprint.agent import BlueprintAgent, SynthesisInput
+        from agents.budget.agent import BudgetAgent
+        from agents.devils_advocate.agent import (
+            DevilsAdvocateAgent,
+            DevilsAdvocateInput,
+        )
+        from agents.github.agent import GitHubAgent
+        from agents.planner.agent import PlannerAgent
+        from agents.research.agent import ResearchAgent
+        from agents.risk.agent import RiskAgent
         from agents.roadmap.agent import RoadmapAgent
         from agents.skill_gap.agent import SkillGapAgent
-        from agents.risk.agent import RiskAgent
-        from agents.devils_advocate.agent import DevilsAdvocateAgent, DevilsAdvocateInput
-        from agents.blueprint.agent import BlueprintAgent, SynthesisInput
         from agents.talent.agent import TalentFinderAgent
         from shared.schemas import Blueprint
 

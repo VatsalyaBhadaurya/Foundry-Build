@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from pydantic import BaseModel, Field
+
 from agents.base import BaseAgent
 from shared.llm import call_llm
 from shared.schemas import ProjectRequirements, SkillRequirement

@@ -1,10 +1,13 @@
 from __future__ import annotations
+
 import logging
 import re
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
-from shared.schemas import Project, Blueprint
+
 import database.client as db
+from shared.schemas import Blueprint, Project
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/export", tags=["export"])
@@ -61,7 +64,7 @@ _UNICODE_MAP = {
     "★": "*", "☆": "*", "●": "-", "○": "-",
     "∞": "inf", "α": "alpha", "β": "beta", "λ": "lambda",
     "μ": "mu", "π": "pi", "σ": "sigma",
-    "​": "", " ": " ", " ": " ", " ": " ",
+    "\u200b": "", " ": " ", " ": " ", " ": " ",
 }
 
 
@@ -99,7 +102,7 @@ class _PDF:
     """Thin wrapper that lazily imports fpdf2 and provides header/footer via subclass."""
 
     @staticmethod
-    def make(project_idea: str, created_at: str) -> "FPDF":
+    def make(project_idea: str, created_at: str) -> FPDF:
         from fpdf import FPDF
 
         idea_short = _latin1_safe(project_idea[:55])

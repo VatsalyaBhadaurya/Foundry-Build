@@ -1,20 +1,22 @@
 from __future__ import annotations
+
 import asyncio
 import json
 import logging
-from typing import AsyncGenerator
-from shared.schemas import ProjectRequirements, Blueprint
-from agents.planner.agent import PlannerAgent
-from agents.github.agent import GitHubAgent
-from agents.research.agent import ResearchAgent
-from agents.budget.agent import BudgetAgent
+from collections.abc import AsyncGenerator
+
 from agents.architecture.agent import ArchitectureAgent
+from agents.blueprint.agent import BlueprintAgent, SynthesisInput
+from agents.budget.agent import BudgetAgent
+from agents.devils_advocate.agent import DevilsAdvocateAgent, DevilsAdvocateInput
+from agents.github.agent import GitHubAgent
+from agents.planner.agent import PlannerAgent
+from agents.research.agent import ResearchAgent
+from agents.risk.agent import RiskAgent
 from agents.roadmap.agent import RoadmapAgent
 from agents.skill_gap.agent import SkillGapAgent
-from agents.risk.agent import RiskAgent
-from agents.devils_advocate.agent import DevilsAdvocateAgent, DevilsAdvocateInput
-from agents.blueprint.agent import BlueprintAgent, SynthesisInput
 from agents.talent.agent import TalentFinderAgent
+from shared.schemas import ProjectRequirements
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +102,7 @@ async def orchestrate(
         timeline_months=requirements.timeline_months or 6,
     )
 
-    da_queue: asyncio.Queue[OrchestratorEvent] = asyncio.Queue()
+    asyncio.Queue()
     da_task = asyncio.create_task(wrap("DevilsAdvocate", DevilsAdvocateAgent().run(da_input)))
 
     da_done = False

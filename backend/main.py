@@ -1,11 +1,13 @@
 from __future__ import annotations
+
 import logging
-import traceback
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from config import settings
+
 from api.v1.router import router
+from config import settings
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,7 +36,7 @@ app.include_router(router)
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logging.error("Unhandled exception on %s: %s", request.url, exc, exc_info=True)
+    logging.error("Unhandled exception on %s: %s", request.url, exc)
     return JSONResponse(
         status_code=500,
         content={"detail": str(exc), "type": type(exc).__name__},

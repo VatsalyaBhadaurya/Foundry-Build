@@ -1,8 +1,10 @@
 from __future__ import annotations
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel
+
 from agents.base import BaseAgent
 from shared.llm import call_llm
-from shared.schemas import ProjectRequirements, DevilCritique
+from shared.schemas import DevilCritique
 
 SYSTEM_PROMPT = """You are a Devil's Advocate — a senior engineer who challenges engineering plans.
 

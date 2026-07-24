@@ -1,13 +1,24 @@
 from __future__ import annotations
+
 import json
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel
+
 from agents.base import BaseAgent
 from shared.llm import call_llm, call_llm_text
 from shared.schemas import (
-    ProjectRequirements, Blueprint, FeasibilityScores,
-    GitHubRepo, ResearchPaper, BOMItem, Risk, SkillRequirement,
-    Milestone, DesignVariant, DevilCritique, TalentFinderOutput,
+    Blueprint,
+    BOMItem,
+    DesignVariant,
+    DevilCritique,
+    FeasibilityScores,
+    GitHubRepo,
+    Milestone,
+    ResearchPaper,
+    Risk,
+    SkillRequirement,
+    TalentFinderOutput,
 )
 
 SYSTEM_PROMPT = """You are a Blueprint Synthesizer — a senior CTO producing the final engineering document.

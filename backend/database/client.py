@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 import json
 import logging
-from typing import Optional
+
 from config import settings
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ async def save_project(project_id: str, data: dict) -> None:
     _store[project_id] = data
 
 
-async def get_project(project_id: str) -> Optional[dict]:
+async def get_project(project_id: str) -> dict | None:
     if _use_supabase():
         try:
             client = _get_supabase()

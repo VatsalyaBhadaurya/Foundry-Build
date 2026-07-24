@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 from fastapi import APIRouter, HTTPException
-from shared.schemas import Project
+
 import database.client as db
+from shared.schemas import Project
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 

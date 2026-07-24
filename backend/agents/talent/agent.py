@@ -1,11 +1,19 @@
 from __future__ import annotations
+
 import logging
+
 import httpx
 from pydantic import BaseModel, Field
+
 from agents.base import BaseAgent
-from shared.llm import call_llm
-from shared.schemas import ProjectRequirements, TalentFinderOutput, PersonProfile, Community
 from config import settings
+from shared.llm import call_llm
+from shared.schemas import (
+    Community,
+    PersonProfile,
+    ProjectRequirements,
+    TalentFinderOutput,
+)
 
 logger = logging.getLogger(__name__)
 

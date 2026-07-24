@@ -1,11 +1,11 @@
 from __future__ import annotations
-import json
+
 from pydantic import BaseModel, Field
-from typing import Optional
+
 from agents.base import BaseAgent
-from shared.llm import call_llm
-from shared.schemas import ProjectRequirements, InterviewState, InterviewTurn
 from config import settings
+from shared.llm import call_llm
+from shared.schemas import InterviewState, ProjectRequirements
 
 SYSTEM_PROMPT = """You are an AI CTO conducting a requirements interview before designing an engineering blueprint.
 
@@ -34,7 +34,7 @@ When complete, extract all gathered information into structured requirements."""
 
 class InterviewResponse(BaseModel):
     complete: bool
-    question: Optional[str] = None
+    question: str | None = None
     inferred_project_type: str = "software"
 
 
@@ -78,13 +78,13 @@ If complete, extract all requirements from the conversation."""
 
         class RequirementsExtraction(BaseModel):
             goal: str
-            budget_usd: Optional[float] = None
-            timeline_months: Optional[int] = None
+            budget_usd: float | None = None
+            timeline_months: int | None = None
             experience_level: str = "intermediate"
             team_size: int = 1
-            country: Optional[str] = None
+            country: str | None = None
             deployment_target: str = "cloud"
-            performance_needs: Optional[str] = None
+            performance_needs: str | None = None
             offline_required: bool = False
             constraints: list[str] = Field(default_factory=list)
             project_type: str = "software"

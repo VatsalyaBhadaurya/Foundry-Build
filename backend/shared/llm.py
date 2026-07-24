@@ -1,11 +1,14 @@
 from __future__ import annotations
-import json
+
 import asyncio
+import json
 import logging
-from typing import Any, Type
+from typing import Any
+
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
+
 from config import settings
 
 logger = logging.getLogger(__name__)
@@ -30,7 +33,7 @@ def _is_rate_limit(exc: Exception) -> bool:
 async def call_llm(
     system_prompt: str,
     user_message: str,
-    response_schema: Type[BaseModel],
+    response_schema: type[BaseModel],
     temperature: float = 0.3,
     max_retries: int = 4,
 ) -> dict[str, Any]:

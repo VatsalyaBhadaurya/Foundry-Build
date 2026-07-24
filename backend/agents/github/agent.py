@@ -1,11 +1,14 @@
 from __future__ import annotations
+
 import logging
+
 import httpx
 from pydantic import BaseModel, Field
+
 from agents.base import BaseAgent
-from shared.llm import call_llm
-from shared.schemas import ProjectRequirements, GitHubRepo
 from config import settings
+from shared.llm import call_llm
+from shared.schemas import GitHubRepo, ProjectRequirements
 
 logger = logging.getLogger(__name__)
 

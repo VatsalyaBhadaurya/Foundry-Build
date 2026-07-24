@@ -1,10 +1,13 @@
 from __future__ import annotations
-import re
+
 import logging
+import re
+
 from pydantic import BaseModel, Field
+
 from agents.base import BaseAgent
 from shared.llm import call_llm, call_llm_text
-from shared.schemas import ProjectRequirements, DesignVariant
+from shared.schemas import DesignVariant, ProjectRequirements
 
 logger = logging.getLogger(__name__)
 

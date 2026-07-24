@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -7,13 +7,13 @@ class ProjectRequirements(BaseModel):
     project_id: str
     idea: str
     goal: str = ""
-    budget_usd: Optional[float] = None
-    timeline_months: Optional[int] = None
+    budget_usd: float | None = None
+    timeline_months: int | None = None
     experience_level: str = "intermediate"  # beginner | intermediate | senior
     team_size: int = 1
-    country: Optional[str] = None
+    country: str | None = None
     deployment_target: str = "cloud"  # cloud | edge | on-prem | embedded | mobile
-    performance_needs: Optional[str] = None
+    performance_needs: str | None = None
     offline_required: bool = False
     constraints: list[str] = Field(default_factory=list)
     project_type: str = "software"  # software | hardware | robotics | ai | embedded | web | mobile | research
@@ -28,7 +28,7 @@ class InterviewState(BaseModel):
     project_id: str
     idea: str
     turns: list[InterviewTurn] = Field(default_factory=list)
-    requirements: Optional[ProjectRequirements] = None
+    requirements: ProjectRequirements | None = None
     complete: bool = False
 
 
@@ -44,7 +44,7 @@ class GitHubRepo(BaseModel):
 class ResearchPaper(BaseModel):
     title: str
     authors: list[str] = Field(default_factory=list)
-    year: Optional[int] = None
+    year: int | None = None
     abstract: str = ""
     url: str = ""
     relevance: str = ""
@@ -179,7 +179,7 @@ class Blueprint(BaseModel):
     devil_critique: DevilCritique
     feasibility: FeasibilityScores
     architecture_diagram: str = ""
-    talent: Optional[TalentFinderOutput] = None
+    talent: TalentFinderOutput | None = None
     markdown: str
     created_at: str
 
@@ -188,7 +188,7 @@ class Project(BaseModel):
     project_id: str
     idea: str
     status: str  # interview | orchestrating | complete | error
-    interview: Optional[InterviewState] = None
-    blueprint: Optional[Blueprint] = None
+    interview: InterviewState | None = None
+    blueprint: Blueprint | None = None
     created_at: str
     updated_at: str

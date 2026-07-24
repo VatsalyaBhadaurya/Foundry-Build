@@ -1,11 +1,14 @@
 from __future__ import annotations
+
 import uuid
 from datetime import datetime, timezone
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from shared.schemas import InterviewState, InterviewTurn, Project
-from agents.interview.agent import InterviewAgent
+
 import database.client as db
+from agents.interview.agent import InterviewAgent
+from shared.schemas import InterviewState, InterviewTurn, Project
 
 router = APIRouter(prefix="/interview", tags=["interview"])
 _agent = InterviewAgent()

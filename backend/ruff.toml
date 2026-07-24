@@ -1,0 +1,6 @@
+[lint]
+ignore = [
+    "BLE001",  # broad Exception catches are intentional in agent/DB fallback paths
+    "F821",    # FPDF forward reference inside classmethod — imported at call site
+    "LOG015",  # root logger in global exception handler is intentional
+]
