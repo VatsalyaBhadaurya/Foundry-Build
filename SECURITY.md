@@ -10,7 +10,7 @@
 
 If you discover a security vulnerability, **do not open a public GitHub issue**.
 
-Email: **vatbhadaurya@gmail.com**
+Email: **vatsalya@nextgenrl.com**
 
 Include:
 - A description of the vulnerability
